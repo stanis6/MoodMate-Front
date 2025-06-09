@@ -1,0 +1,312 @@
+<app-header></app-header>
+
+<div class="flex flex-col h-screen">
+  <div
+    *ngIf="classroom; else loading"
+    class="flex flex-col flex-1 max-w-3xl mx-auto w-full p-gutter font-sans text-text overflow-hidden"
+  >
+    <!-- Classroom header bar -->
+    <div class="flex-none flex items-center justify-between bg-header rounded-2xl p-4 shadow-card">
+      <div>
+        <h1 class="text-2xl font-semibold text-bg">{{ classroom.name }}</h1>
+        <p class="text-sm text-bg/90 mt-1">
+          Teacher ID: <span class="font-medium">{{ classroom.teacherId }}</span>
+          · Students: <span class="font-medium">{{ classroom.students.length }}</span>
+        </p>
+      </div>
+      <button
+        (click)="openAddChildModal()"
+        class="px-3 py-1 text-sm font-medium bg-bg text-header rounded-lg shadow-card hover:shadow-card-hover hover:bg-bg/90 transition"
+      >
+        Add Student
+      </button>
+    </div>
+
+    <!-- Students list: scrollable -->
+    <section class="flex flex-col flex-1 mt-4">
+      <h2 class="flex-none text-xl font-medium text-header mb-4">Students</h2>
+      <div class="flex-1 overflow-y-auto border border-border rounded-lg p-4 bg-bg">
+        <ul class="grid grid-cols-1 sm:grid-cols-2 gap-4 list-none p-0 m-0">
+          <li
+            *ngFor="let s of classroom.students"
+            (click)="openReport(s)"
+            class="
+              bg-bg
+              rounded-2xl
+              p-4
+              border border-border
+              shadow-card
+              transform
+              transition-transform
+              duration-200
+              hover:-translate-y-1
+              hover:shadow-card-hover
+              cursor-pointer
+            "
+          >
+            <div class="text-base font-semibold text-header mb-1">
+              {{ s.lastName }} {{ s.firstName }}
+            </div>
+            <div class="text-sm text-sub">{{ s.username }}</div>
+          </li>
+        </ul>
+      </div>
+    </section>
+  </div>
+</div>
+
+<ng-template #loading>
+  <p class="text-center text-sub">Loading classroom details…</p>
+</ng-template>
+
+<!-- Report Modal -->
+<div
+  *ngIf="isReportModalOpen"
+  class="fixed inset-0 flex items-center justify-center z-50"
+>
+  <!-- Backdrop -->
+  <div
+    class="absolute inset-0 bg-black/50 animate-overlay-in"
+    (click)="closeReportModal()"
+  ></div>
+
+  <!-- Modal Content -->
+  <div
+    class="relative bg-bg rounded-2xl shadow-card w-11/12 max-w-2xl mx-auto p-6 animate-modal-in"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Modal Header -->
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-semibold text-header">
+        Raport: {{ selectedChildName }}
+      </h3>
+      <button
+        (click)="closeReportModal()"
+        class="text-2xl text-sub hover:text-header transition"
+      >
+        &times;
+      </button>
+    </div>
+
+    <!-- Chart & Data (only if reportData exists) -->
+    <div *ngIf="reportData">
+      <!-- Top row: date + today's score -->
+      <div class="flex items-center justify-between mb-2">
+        <div>
+          <div class="text-lg font-medium text-header">
+            Data curentă: {{ reportData.date }}
+          </div>
+        </div>
+        <div class="text-right">
+          <div class="text-lg font-medium text-header">
+            Scor: {{ reportData.score }} / {{ reportData.answers.length * 3 }}
+          </div>
+          <div class="text-xs text-sub">
+            (media: {{
+              reportData.answers.length > 0
+                ? (reportData.score / reportData.answers.length).toFixed(1)
+                : '0.0'
+            }})
+          </div>
+        </div>
+      </div>
+
+      <!-- Chart.js canvas -->
+      <div class="w-full h-64 mb-4">
+        <!-- The #scoreChart reference is used by @ViewChild -->
+        <canvas #scoreChart></canvas>
+      </div>
+
+      <!-- Date selector -->
+      <div class="mb-4 flex flex-wrap gap-2">
+        <!-- 'Azi' button -->
+        <button
+          class="px-3 py-1 rounded-lg border transition"
+          [ngClass]="{
+            'bg-header text-bg shadow-card': reportDate === today,
+            'bg-bg text-header hover:bg-border': reportDate !== today
+          }"
+          (click)="onDateChange(today)"
+        >
+          Azi
+        </button>
+
+        <!-- One button per recorded date -->
+        <button
+          *ngFor="let r of allReports"
+          class="px-3 py-1 rounded-lg border transition"
+          [ngClass]="{
+            'bg-header text-bg shadow-card': r.date === reportDate,
+            'bg-bg text-header hover:bg-border': r.date !== reportDate
+          }"
+          (click)="onDateChange(r.date)"
+        >
+          {{ r.date }}
+        </button>
+      </div>
+
+      <!-- Answers list -->
+      <div class="space-y-4 max-h-[40vh] overflow-y-auto">
+        <div *ngIf="reportError" class="text-center text-red-500 py-6">
+          {{ reportError }}
+        </div>
+        <div
+          *ngIf="!reportError && reportData.answers.length === 0"
+          class="text-center text-sub py-4"
+        >
+          Niciun răspuns înregistrat pentru această dată.
+        </div>
+        <ul *ngIf="reportData.answers.length > 0" class="space-y-3">
+          <li
+            *ngFor="let ans of reportData.answers"
+            class="p-4 border border-border rounded-lg bg-bg shadow-card"
+          >
+            <div class="text-xs text-sub mb-1">{{ ans.category }}</div>
+            <div class="font-medium text-header">{{ ans.questionPrompt }}</div>
+            <div class="mt-1 text-sm">
+              <span class="font-medium">Răspuns:</span> {{ ans.answer }}
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Buttons row: Download, Send Email, Close -->
+      <div class="mt-6 flex flex-col items-center space-y-2">
+        <div *ngIf="emailSuccessMsg" class="text-sm text-green-600">
+          {{ emailSuccessMsg }}
+        </div>
+        <div *ngIf="emailErrorMsg" class="text-sm text-red-600">
+          {{ emailErrorMsg }}
+        </div>
+        <div class="flex space-x-4">
+          <button
+            (click)="downloadPdf()"
+            class="px-4 py-2 bg-accentBlue text-bg rounded-lg shadow-card hover:shadow-glow-blue hover:bg-header transition"
+          >
+            Download PDF
+          </button>
+          <button
+            (click)="sendReportEmail()"
+            class="px-4 py-2 bg-accentBlue text-bg rounded-lg shadow-card hover:shadow-glow-blue hover:bg-header transition"
+          >
+            Send to Parent
+          </button>
+          <button
+            (click)="closeReportModal()"
+            class="px-4 py-2 bg-header text-bg rounded-lg shadow-card hover:shadow-card-hover hover:bg-header/90 transition"
+          >
+            Închide
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────────── Add Student Modal ─────────────── -->
+<div
+  *ngIf="isAddChildModalOpen"
+  class="fixed inset-0 flex items-center justify-center z-50"
+>
+  <!-- Backdrop -->
+  <div
+    class="absolute inset-0 bg-black/50 animate-overlay-in"
+    (click)="closeAddChildModal()"
+  ></div>
+
+  <!-- Modal Content -->
+  <div
+    class="relative bg-bg rounded-2xl shadow-card w-11/12 max-w-md mx-auto p-6 animate-modal-in"
+    (click)="$event.stopPropagation()"
+  >
+    <!-- Header of Add Student Modal -->
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-semibold text-header">New Student</h3>
+      <button
+        (click)="closeAddChildModal()"
+        class="text-2xl text-sub hover:text-header transition"
+      >
+        &times;
+      </button>
+    </div>
+
+    <!-- Form -->
+    <form [formGroup]="addChildForm" (ngSubmit)="onSubmit()">
+      <div class="grid gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-1">Parent Email</label>
+          <input
+            type="email"
+            formControlName="parentEmail"
+            class="w-full p-2 border border-border rounded-lg shadow-card"
+          />
+          <p
+            *ngIf="
+              addChildForm.get('parentEmail')?.touched &&
+              addChildForm.get('parentEmail')?.invalid
+            "
+            class="text-xs text-red-500"
+          >
+            Valid email required.
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">Child First Name</label>
+          <input
+            type="text"
+            formControlName="childFirstName"
+            class="w-full p-2 border border-border rounded-lg shadow-card"
+          />
+          <p
+            *ngIf="
+              addChildForm.get('childFirstName')?.touched &&
+              addChildForm.get('childFirstName')?.invalid
+            "
+            class="text-xs text-red-500"
+          >
+            First name is required.
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-1">Child Last Name</label>
+          <input
+            type="text"
+            formControlName="childLastName"
+            class="w-full p-2 border border-border rounded-lg shadow-card"
+          />
+          <p
+            *ngIf="
+              addChildForm.get('childLastName')?.touched &&
+              addChildForm.get('childLastName')?.invalid
+            "
+            class="text-xs text-red-500"
+          >
+            Last name is required.
+          </p>
+        </div>
+      </div>
+
+      <div class="mt-6 flex items-center space-x-4">
+        <button
+          type="submit"
+          [disabled]="addChildForm.invalid"
+          class="px-4 py-2 bg-header text-bg rounded-lg shadow-card hover:shadow-card-hover hover:bg-header/90 transition"
+        >
+          Send Confirmation
+        </button>
+        <button
+          type="button"
+          (click)="closeAddChildModal()"
+          class="px-4 py-2 bg-border text-header rounded-lg shadow-card hover:shadow-card-hover hover:bg-border/90 transition"
+        >
+          Cancel
+        </button>
+      </div>
+
+      <p *ngIf="errorMsg" class="mt-4 text-sm text-red-600">{{ errorMsg }}</p>
+      <p *ngIf="successMsg" class="mt-4 text-sm text-green-600">{{ successMsg }}</p>
+    </form>
+  </div>
+</div>

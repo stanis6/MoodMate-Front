@@ -1,0 +1,32 @@
+<header
+  class="bg-header text-bg border-b border-border px-gutter py-2 flex items-center justify-between"
+>
+  <h1 class="text-xl font-medium">{{ title }}</h1>
+
+  <div class="flex items-center space-x-4">
+    <nav class="flex space-x-4">
+      <a
+        routerLink="/dashboard"
+        routerLinkActive="border-b-2 border-sub text-bg font-semibold"
+        [routerLinkActiveOptions]="{ exact: true }"
+        class="px-3 py-1 text-sm hover:text-sub transition"
+      >
+        Dashboard
+      </a>
+      <a
+        routerLink="/classroom"
+        routerLinkActive="border-b-2 border-sub text-bg font-semibold"
+        class="px-3 py-1 text-sm hover:text-sub transition"
+      >
+        Classroom
+      </a>
+    </nav>
+
+    <button
+      (click)="logout()"
+      class="px-3 py-1 text-sm font-medium bg-sub text-bg rounded hover:bg-sub/80 transition"
+    >
+      Logout
+    </button>
+  </div>
+</header>

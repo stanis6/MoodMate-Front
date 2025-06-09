@@ -1,0 +1,34 @@
+<div class="login-page">
+  <div class="login-card">
+    <img src="assets/logo.png" alt="Logo" class="logo"/>
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-group with-icon">
+        <i class="fa fa-user icon"></i>
+        <input
+          type="text"
+          id="username"
+          formControlName="username"
+          placeholder="Nume de utilizator"
+          required
+        />
+      </div>
+
+      <div class="form-group with-icon">
+        <i class="fa fa-lock icon"></i>
+        <input
+          type="password"
+          id="password"
+          formControlName="password"
+          placeholder="Parolă"
+          required
+        />
+      </div>
+      <div *ngIf="error" class="form-error-message">
+        {{ error }}
+      </div>
+
+      <button type="submit" class="login-button" [disabled]="formSubmitted">Conectează-te</button>
+    </form>
+    <p>Nu ai cont? <a routerLink="/register">Înregistrează-te aici</a></p>
+  </div>
+</div>

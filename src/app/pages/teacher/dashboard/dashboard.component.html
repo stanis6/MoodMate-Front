@@ -1,0 +1,32 @@
+<app-header></app-header>
+
+<div class="teacher-page max-w-3xl mx-auto p-gutter font-sans text-text">
+  <h1 class="text-3xl font-semibold text-header mb-2">Welcome, Teacher</h1>
+  <p class="text-sub mb-6">Aceasta este pagina principală a profesorului.</p>
+
+  <!-- Loading / Error states -->
+  <div *ngIf="loading" class="text-center text-sub mb-6">
+    Se încarcă dashboard…
+  </div>
+  <div *ngIf="error" class="text-center text-red-500 mb-6">
+    {{ error }}
+  </div>
+
+  <!-- Dashboard Summary -->
+  <div *ngIf="!loading && !error" class="dashboard-summary mb-8">
+    <h2 class="text-2xl font-medium text-header mb-4">Dashboard Summary</h2>
+
+    <!-- Only Recent Activities, full-width -->
+    <div class="summary-item bg-bg border border-border rounded-lg p-6 shadow-card mb-8">
+      <h3 class="text-xl font-medium text-header mb-4">Recent Activities</h3>
+      <ul class="list-disc list-inside space-y-2 text-sub ml-4">
+        <li *ngFor="let act of recentActivities">
+          {{ act }}
+        </li>
+        <li *ngIf="recentActivities.length === 0" class="italic">
+          Nicio activitate recentă.
+        </li>
+      </ul>
+    </div>
+  </div>
+</div>

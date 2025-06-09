@@ -1,0 +1,120 @@
+<!-- src/app/features/quiz/quiz.component.html -->
+<div
+  class="min-h-screen flex items-center justify-center p-4 bg-cover bg-center"
+  style="background-image: url('/assets/background.png')"
+>
+  <div class="w-full max-w-md bg-white/90 rounded-3xl shadow-card p-6 backdrop-blur-sm">
+
+    <!-- Progress Bar -->
+    <div class="mb-6">
+      <div class="text-sm text-sub text-center mb-1">
+        Întrebarea {{ currentStepIndex + 1 }} din {{ questions.length }}
+      </div>
+      <div class="h-2 bg-border rounded-full overflow-hidden">
+        <div
+          class="h-full bg-gradient-to-r from-accentGreen to-accentBlue transition-all"
+          [style.width.%]="(currentStepIndex / questions.length) * 100"
+        ></div>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="!questions.length" class="text-center text-sub">
+      Se încarcă întrebările...
+    </div>
+
+    <!-- Quiz Questions -->
+    <ng-container *ngIf="questions.length">
+      <ng-container *ngIf="currentStepIndex < questions.length; else doneBlock">
+        <ng-container
+          *ngTemplateOutlet="
+            questionBlock;
+            context: { $implicit: questions[currentStepIndex] }
+          "
+        ></ng-container>
+      </ng-container>
+    </ng-container>
+
+    <!-- Done Screen -->
+    <ng-template #doneBlock>
+      <div class="text-center">
+        <div class="flex justify-center mb-4 space-x-2">
+          <span class="text-4xl text-accentPurple animate-confetti-fall">🎉</span>
+          <span class="text-4xl text-accentBlue animate-confetti-fall delay-200">🎊</span>
+          <span class="text-4xl text-accentGreen animate-confetti-fall delay-400">🎈</span>
+        </div>
+
+        <h2 class="text-3xl font-bold text-accentBlue mb-4">
+          Bravo, ai terminat!
+        </h2>
+        <p class="text-md text-sub mb-6">
+          Ai răspuns la toate întrebările de azi.
+          Profesorul tău va vedea răspunsurile.
+        </p>
+        <button
+          (click)="goToLogin()"
+          class="px-6 py-3 bg-accentGreen text-white font-semibold rounded-2xl shadow-glow-green hover:bg-accentBlue transition"
+        >
+          Înapoi la autentificare
+        </button>
+      </div>
+    </ng-template>
+
+    <!-- Single Question Template -->
+    <ng-template #questionBlock let-q>
+      <div class="text-center">
+        <h3 class="text-2xl font-semibold text-header mb-6">
+          {{ q.prompt }}
+        </h3>
+
+        <!-- EMOJI Questions -->
+        <div *ngIf="q.type === 'EMOJI'" class="flex justify-around mb-6">
+          <!-- Sad -->
+          <button
+            (click)="selectEmoji(q, 'sad')"
+            class="bg-pastelYellow rounded-full w-20 h-20 flex items-center justify-center text-4xl shadow-glow-orange hover:scale-110 transition-transform"
+            aria-label="sad"
+          >
+            <span class="animate-wiggle-fast">😢</span>
+          </button>
+          <!-- Neutral -->
+          <button
+            (click)="selectEmoji(q, 'neutral')"
+            class="bg-pastelYellow rounded-full w-20 h-20 flex items-center justify-center text-4xl shadow-glow-orange hover:scale-110 transition-transform delay-100"
+            aria-label="neutral"
+          >
+            <span class="animate-wiggle-fast">😐</span>
+          </button>
+          <!-- Happy -->
+          <button
+            (click)="selectEmoji(q, 'happy')"
+            class="bg-pastelYellow rounded-full w-20 h-20 flex items-center justify-center text-4xl shadow-glow-orange hover:scale-110 transition-transform delay-200"
+            aria-label="happy"
+          >
+            <span class="animate-bounce-playful">😊</span>
+          </button>
+        </div>
+
+        <div *ngIf="q.type === 'YES_NO'" class="flex justify-around mb-6">
+          <button
+            (click)="selectYesNo(q, 'yes')"
+            class="bg-accentGreen rounded-full w-20 h-20 flex items-center justify-center leading-none text-4xl shadow-glow-green hover:scale-110 transition duration-200"
+            aria-label="yes"
+          >
+            👍
+          </button>
+
+          <button
+            (click)="selectYesNo(q, 'no')"
+            class="bg-accentOrange rounded-full w-20 h-20 flex items-center justify-center leading-none text-4xl shadow-glow-orange hover:scale-110 transition duration-200"
+            aria-label="no"
+          >
+            👎
+          </button>
+        </div>
+
+      </div>
+    </ng-template>
+
+  </div>
+</div>

@@ -1,0 +1,93 @@
+<!-- src/app/features/confirm/confirm.component.html -->
+<div class="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+  <div class="max-w-md w-full bg-white rounded-lg shadow-md p-6 text-center">
+    <ng-container [ngSwitch]="status">
+
+      <!-- still confirming token on server -->
+      <div *ngSwitchCase="'pending'">
+        <p class="text-lg">Confirming your child’s account…</p>
+      </div>
+
+      <div *ngSwitchCase="'showForm'">
+        <h2 class="text-2xl font-semibold text-header mb-4">Welcome!</h2>
+
+        <p class="mb-4">
+          {{ childFirstName }} {{ childLastName }}’s username:
+          <strong>{{ childUsername }}</strong>
+        </p>
+
+        <form [formGroup]="setPasswordForm" (ngSubmit)="onSubmitPassword()">
+          <div class="mb-4 text-left">
+            <label class="block text-sm font-medium mb-1">New Password</label>
+            <input
+              type="password"
+              formControlName="newPassword"
+              class="w-full p-2 border border-border rounded"
+            />
+            <p
+              *ngIf="
+                setPasswordForm.get('newPassword')?.touched &&
+                setPasswordForm.get('newPassword')?.hasError('minlength')
+              "
+              class="text-xs text-red-500"
+            >
+              Password must be at least 6 characters.
+            </p>
+          </div>
+
+          <div class="mb-4 text-left">
+            <label class="block text-sm font-medium mb-1"
+            >Confirm Password</label
+            >
+            <input
+              type="password"
+              formControlName="confirmPassword"
+              class="w-full p-2 border border-border rounded"
+            />
+            <p
+              *ngIf="
+                setPasswordForm.hasError('mismatch') &&
+                setPasswordForm.get('confirmPassword')?.touched
+              "
+              class="text-xs text-red-500"
+            >
+              Passwords do not match.
+            </p>
+          </div>
+
+          <button
+            type="submit"
+            [disabled]="setPasswordForm.invalid"
+            class="w-full py-2 bg-header text-bg rounded hover:bg-header/90 transition"
+          >
+            Set Password
+          </button>
+        </form>
+      </div>
+
+      <div *ngSwitchCase="'success'">
+        <h2 class="text-2xl font-semibold text-green-600">All Set!</h2>
+        <p class="mt-4">{{ message }}</p>
+        <button
+          (click)="goToLogin()"
+          class="mt-6 px-4 py-2 bg-header text-bg rounded hover:bg-header/90 transition"
+        >
+          Go to Login
+        </button>
+      </div>
+
+      <!-- any error state -->
+      <div *ngSwitchCase="'error'">
+        <h2 class="text-2xl font-semibold text-red-600">Oops!</h2>
+        <p class="mt-4">{{ message }}</p>
+        <button
+          (click)="goToLogin()"
+          class="mt-6 px-4 py-2 bg-header text-bg rounded hover:bg-header/90 transition"
+        >
+          Back to Login
+        </button>
+      </div>
+
+    </ng-container>
+  </div>
+</div>

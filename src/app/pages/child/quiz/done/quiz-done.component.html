@@ -1,0 +1,31 @@
+<div
+  class="min-h-screen flex items-center justify-center p-4 bg-cover bg-center"
+  style="background-image: url('/assets/background.png')"
+>
+  <div class="w-full max-w-md bg-white/80 rounded-3xl shadow-card p-6 backdrop-blur-sm">
+    <div class="text-center space-y-4">
+      <div class="flex justify-center space-x-2">
+        <span class="text-5xl animate-bounce-playful">🏆</span>
+        <span class="text-5xl animate-confetti-fall delay-100">🎉</span>
+        <span class="text-5xl animate-confetti-fall delay-300">🥳</span>
+        <span class="text-5xl animate-bounce-playful">🎈</span>
+      </div>
+
+      <h2 class="text-4xl font-bold text-accentBlue">
+        Felicitări!
+      </h2>
+
+      <p class="text-lg text-sub px-4">
+        Ai terminat chestionarul de azi cu succes.
+        Profesorul va vedea răspunsurile tale!
+      </p>
+
+      <button
+        (click)="goToLogin()"
+        class="mt-4 px-6 py-3 bg-accentGreen text-white font-semibold rounded-2xl shadow-glow-green hover:bg-accentBlue transition"
+      >
+        Înapoi la autentificare
+      </button>
+    </div>
+  </div>
+</div>
